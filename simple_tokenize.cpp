@@ -92,6 +92,33 @@ void token_encode(vocab_info *vinfo, const char *str, int *tokens, int *tokens_n
     }
 }
 
+void token_merge(vocab_info *vinfo, const char *str, int *tokens, int *tokens_num) {
+    char *buf = (char *)malloc((vinfo->max_token_len * 2 + 1) * sizeof(char));
+    
+    while (1) {
+        bool found = false;
+        for (int i = 0; i < (*tokens_num - 1); i++) {
+            sprintf(buf, "%s%s", vinfo->vocab[tokens[i]], vinfo->vocab[tokens[i + 1]]);
+            int id = str2token(buf, vinfo);
+            if (id >= 0) {
+                for (int j = i + 1; j < (*tokens_num - 1); j++) {
+                    tokens[j] = tokens[j + 1];
+                }
+                tokens[i] = id;
+                (*tokens_num)--;
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            break;
+        }
+    }
+
+    free(buf);
+}
+
 int main(int argc, char *argv[]) {
     if (argc != 2) {
         printf("Usage:\n\t%s sentence\n", argv[0]);
@@ -101,16 +128,23 @@ int main(int argc, char *argv[]) {
     const char *str = argv[1];
     int tokens_num = 0;
     int *tokens = (int *)malloc((strlen(str) + 1) * sizeof(int));
-    printf("[1] original sentence is: [%s]\n", str);
+    printf("[1] original sentence is:\n\t%s\n", str);
 
     vocab_info vinfo;
     load_vocab(&vinfo);
     token_encode(&vinfo, str, tokens, &tokens_num);
+    token_merge(&vinfo, str, tokens, &tokens_num);
 
     printf("[2] tokenize result is:\n");
     for (int i = 0; i < tokens_num; i++) {
-        printf("\tid %d, %d\n", i, tokens[i]);
+        printf("\ttoken %03d, %d\n", i + 1, tokens[i]);
     }
+
+    printf("[3] decode result from tokens:\n\t");
+    for (int i = 0; i < tokens_num; i++) {
+        printf("%s", vinfo.vocab[tokens[i]]);
+    }
+    printf("\n");
 
     free_vocab(&vinfo);
 
