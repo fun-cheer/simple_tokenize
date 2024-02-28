@@ -42,4 +42,4 @@ jobs:
       run: |
         cp vocab.bin build/
         cd build
-        ./simple_tokenize test
+        ./simple_tokenize "Test input for simple_tokenize"
