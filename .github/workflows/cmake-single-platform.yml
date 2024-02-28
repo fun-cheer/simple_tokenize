@@ -40,5 +40,6 @@ jobs:
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: |
+        cp vocab.bin build/
         cd build
         ./simple_tokenize test
